@@ -1,11 +1,11 @@
 [app]
 
-title = Adım Sayar
+title = Adim Sayar
 package.name = adimsayar
-package.domain = org.adimsayar
+package.domain = org.gamertilki
 
 source.dir = .
-source.include_exts = py,json,png,jpg,jpeg,kv,atlas
+source.include_exts = py,png,jpg,jpeg,kv,json,atlas
 
 version = 1.0
 
@@ -19,13 +19,11 @@ android.permissions = ACTIVITY_RECOGNITION
 
 android.api = 35
 android.minapi = 21
-android.ndk = 26c
+android.ndk = 28c
 
 android.archs = arm64-v8a
 
 android.accept_sdk_license = True
-
-android.allow_backup = False
 
 [buildozer]
 
