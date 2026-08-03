@@ -1,57 +1,59 @@
 [app]
 
-# Uygulamanın adı
-title = Adim Sayaci
+# Uygulama Başlığı
+title = Step Pro
 
-# Paket adı (Boşluksuz ve küçük harf olmalı)
-package.name = adimsayaci
+# Paket Adı (Küçük harf ve boşluksuz)
+package.name = steppro
 
-# Paket domaini
+# Paket Domaini
 package.domain = org.sulo
 
-# Kaynak kod dizini (main.py'nin olduğu yer)
+# Kaynak kod dizini (main.py'nin olduğu dizin)
 source.dir = .
 
-# Dahil edilecek dosya uzantıları
-source.include_exts = py,png,jpg,kv,atlas
+# Kodun dahil edeceği dosya uzantıları (JSON verisini ve ikonları kapsar)
+source.include_exts = py,png,jpg,kv,atlas,json
 
-# Uygulama versiyonu
+# Uygulama Versiyonu
 version = 0.1
 
-# GEREKSİNİMLER (Sensör için plyer eklendi)
-requirements = python3, kivy, plyer
+# GEREKSİNİMLER
+# Kodundaki 'from android.permissions import ...' yapısı için 'android' kütüphanesi eklendi.
+requirements = python3, kivy, android
 
-# Ekran yönü (Adım sayacı için dikey - portrait)
+# Ekran Yönü (Dikey)
 orientation = portrait
 
-# Tam ekran modu (0 = Kapalı, üstteki saat ve şarj görünür)
+# Tam Ekran Modu (0 = Üstteki durum çubuğu görünür)
 fullscreen = 0
 
-# İZİNLER (İvmeölçer sensör izni)
-android.permissions = HIGH_SAMPLING_RATE_SENSORS
+# İZİNLER
+# Kodunda istediğin ACTIVITY_RECOGNITION ve ivmeölçer için gerekli izinler:
+android.permissions = ACTIVITY_RECOGNITION, HIGH_SAMPLING_RATE_SENSORS
 
-# Hedef Android API sürümü
+# Hedef Android API Sürümü
 android.api = 33
 
-# Minimum Android API sürümü
-android.minapi = 24
+# Minimum Android API Sürümü (ACTIVITY_RECOGNITION izni için en az 29 önerilir)
+android.minapi = 29
 
-# NDK SÜRÜMÜ (Hata almamak için 25b'ye sabitlendi)
+# NDK SÜRÜMÜ (Derleme hatası almamak için 25b'ye sabitlendi)
 android.ndk = 25b
 
-# SDK lisanslarını otomatik kabul et
+# SDK Lisanslarını Otomatik Kabul Et
 android.accept_sdk_license = True
 
-# Derlenecek mimariler (Çoğu modern telefon için)
+# Desteklenen İşlemci Mimarileri
 android.archs = arm64-v8a, armeabi-v7a
 
-# Yedeklemeye izin ver
+# Android Otomatik Yedekleme
 android.allow_backup = True
 
 [buildozer]
 
-# Hata ayıklama log seviyesi (2 = Detaylı çıktı)
+# Detaylı Hata Log Seviyesi
 log_level = 2
 
-# Root uyarısı
+# Root Uyarısı
 warn_on_root = 1
