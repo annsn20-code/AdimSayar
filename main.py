@@ -1,233 +1,59 @@
-import json
-import os
-from datetime import date
+[app]
 
-from kivy.app import App
-from kivy.clock import Clock
-from kivy.metrics import dp
+# Uygulama Başlığı
+title = Step Pro
 
-from kivy.graphics import Color, RoundedRectangle
+# Paket Adı (Küçük harf ve boşluksuz)
+package.name = steppro
 
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.label import Label
-from kivy.uix.progressbar import ProgressBar
-from kivy.uix.button import Button
-from kivy.uix.popup import Popup
-from kivy.uix.textinput import TextInput
+# Paket Domaini
+package.domain = org.sulo
 
+# Kaynak kod dizini (main.py'nin olduğu dizin)
+source.dir = .
 
-# ===============================
-# ANDROID SENSOR
-# ===============================
+# Kodun dahil edeceği dosya uzantıları (JSON verisini ve ikonları kapsar)
+source.include_exts = py,png,jpg,kv,atlas,json
 
-try:
-    from android.permissions import request_permissions, Permission
-    ANDROID = True
+# Uygulama Versiyonu
+version = 0.1
 
-except:
-    ANDROID = False
+# GEREKSİNİMLER
+# Kodundaki 'from android.permissions import ...' yapısı için 'android' kütüphanesi eklendi.
+requirements = python3, kivy, android
 
+# Ekran Yönü (Dikey)
+orientation = portrait
 
+# Tam Ekran Modu (0 = Üstteki durum çubuğu görünür)
+fullscreen = 0
 
-DATA_FILE = "step_data.json"
+# İZİNLER
+# Kodunda istediğin ACTIVITY_RECOGNITION ve ivmeölçer için gerekli izinler:
+android.permissions = ACTIVITY_RECOGNITION, HIGH_SAMPLING_RATE_SENSORS
 
+# Hedef Android API Sürümü
+android.api = 33
 
+# Minimum Android API Sürümü (ACTIVITY_RECOGNITION izni için en az 29 önerilir)
+android.minapi = 29
 
-# ===============================
-# VERİLER
-# ===============================
+# NDK SÜRÜMÜ (Derleme hatası almamak için 25b'ye sabitlendi)
+android.ndk = 25b
 
-def default_data():
+# SDK Lisanslarını Otomatik Kabul Et
+android.accept_sdk_license = True
 
-    return {
-        "date": str(date.today()),
-        "steps": 0,
-        "goal": 10000,
-        "record": 0,
-        "sensor_start": None
-    }
+# Desteklenen İşlemci Mimarileri
+android.archs = arm64-v8a, armeabi-v7a
 
+# Android Otomatik Yedekleme
+android.allow_backup = True
 
+[buildozer]
 
-def load_data():
+# Detaylı Hata Log Seviyesi
+log_level = 2
 
-    if not os.path.exists(DATA_FILE):
-        return default_data()
-
-
-    try:
-
-        with open(DATA_FILE,"r") as f:
-            data=json.load(f)
-
-
-        if data["date"] != str(date.today()):
-
-            if data["steps"] > data["record"]:
-                data["record"]=data["steps"]
-
-
-            data["date"]=str(date.today())
-            data["steps"]=0
-            data["sensor_start"]=None
-
-
-        return data
-
-
-    except:
-
-        return default_data()
-
-
-
-def save_data(data):
-
-    with open(DATA_FILE,"w") as f:
-
-        json.dump(
-            data,
-            f,
-            indent=4
-        )
-
-
-
-# ===============================
-# KART TASARIMI
-# ===============================
-
-class Card(BoxLayout):
-
-    def __init__(self,**kwargs):
-
-        super().__init__(**kwargs)
-
-
-        with self.canvas.before:
-
-            Color(
-                0.08,
-                0.09,
-                0.13,
-                1
-            )
-
-
-            self.bg = RoundedRectangle(
-                radius=[dp(20)]
-            )
-
-
-        self.bind(
-            pos=self.update,
-            size=self.update
-        )
-
-
-
-    def update(self,*args):
-
-        self.bg.pos=self.pos
-        self.bg.size=self.size
-
-
-
-# ===============================
-# UYGULAMA
-# ===============================
-
-
-class StepCounter(App):
-
-
-    def build(self):
-
-        self.title="Step Pro"
-
-
-
-        self.data=load_data()
-
-
-        self.steps=self.data["steps"]
-        self.goal=self.data["goal"]
-        self.record=self.data["record"]
-
-        self.sensor_start=self.data["sensor_start"]
-
-
-
-        if ANDROID:
-
-            request_permissions(
-                [
-                    Permission.ACTIVITY_RECOGNITION
-                ]
-            )
-
-
-
-        root=BoxLayout(
-            orientation="vertical",
-            padding=dp(20),
-            spacing=dp(15)
-        )
-
-
-
-        with root.canvas.before:
-
-            Color(
-                0.03,
-                0.04,
-                0.06,
-                1
-            )
-
-
-            self.background=RoundedRectangle()
-
-
-
-        root.bind(
-            pos=self.update_bg,
-            size=self.update_bg
-        )
-
-
-
-        title=Label(
-
-            text="👟 STEP PRO",
-
-            font_size=dp(30),
-
-            bold=True,
-
-            size_hint_y=None,
-
-            height=dp(60)
-
-        )
-
-
-        root.add_widget(title)
-
-
-
-        self.status=Label(
-
-            text="Sensör hazırlanıyor",
-
-            color=(0.3,0.7,1,1),
-
-            size_hint_y=None,
-
-            height=dp(30)
-
-        )
-
-
-        root.add_widget(self.status)
+# Root Uyarısı
+warn_on_root = 1
