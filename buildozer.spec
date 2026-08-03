@@ -1,31 +1,57 @@
 [app]
 
-title = Adim Sayar
-package.name = adimsayar
-package.domain = org.gamertilki
+# Uygulamanın adı
+title = Adim Sayaci
 
+# Paket adı (Boşluksuz ve küçük harf olmalı)
+package.name = adimsayaci
+
+# Paket domaini
+package.domain = org.sulo
+
+# Kaynak kod dizini (main.py'nin olduğu yer)
 source.dir = .
-source.include_exts = py,png,jpg,jpeg,kv,json,atlas
 
-version = 1.0
+# Dahil edilecek dosya uzantıları
+source.include_exts = py,png,jpg,kv,atlas
 
-requirements = python3,kivy,pyjnius
+# Uygulama versiyonu
+version = 0.1
 
+# GEREKSİNİMLER (Sensör için plyer eklendi)
+requirements = python3, kivy, plyer
+
+# Ekran yönü (Adım sayacı için dikey - portrait)
 orientation = portrait
 
+# Tam ekran modu (0 = Kapalı, üstteki saat ve şarj görünür)
 fullscreen = 0
 
-android.permissions = ACTIVITY_RECOGNITION
+# İZİNLER (İvmeölçer sensör izni)
+android.permissions = HIGH_SAMPLING_RATE_SENSORS
 
-android.api = 35
-android.minapi = 21
-android.ndk = 28c
+# Hedef Android API sürümü
+android.api = 33
 
-android.archs = arm64-v8a
+# Minimum Android API sürümü
+android.minapi = 24
 
+# NDK SÜRÜMÜ (Hata almamak için 25b'ye sabitlendi)
+android.ndk = 25b
+
+# SDK lisanslarını otomatik kabul et
 android.accept_sdk_license = True
+
+# Derlenecek mimariler (Çoğu modern telefon için)
+android.archs = arm64-v8a, armeabi-v7a
+
+# Yedeklemeye izin ver
+android.allow_backup = True
 
 [buildozer]
 
+# Hata ayıklama log seviyesi (2 = Detaylı çıktı)
 log_level = 2
+
+# Root uyarısı
 warn_on_root = 1
