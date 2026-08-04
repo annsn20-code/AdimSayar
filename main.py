@@ -1,233 +1,209 @@
 import json
 import os
 from datetime import date
-
-from kivy.app import App
-from kivy.clock import Clock
-from kivy.metrics import dp
-
-from kivy.graphics import Color, RoundedRectangle
-
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.label import Label
-from kivy.uix.progressbar import ProgressBar
-from kivy.uix.button import Button
-from kivy.uix.popup import Popup
-from kivy.uix.textinput import TextInput
-
-
-# ===============================
-# ANDROID SENSOR
-# ===============================
-
-try:
-    from android.permissions import request_permissions, Permission
-    ANDROID = True
-
-except:
-    ANDROID = False
-
-
+import flet as ft
 
 DATA_FILE = "step_data.json"
 
-
-
 # ===============================
-# VERİLER
+# VERİ İŞLEMLERİ
 # ===============================
 
 def default_data():
-
     return {
         "date": str(date.today()),
         "steps": 0,
         "goal": 10000,
         "record": 0,
-        "sensor_start": None
     }
 
-
-
 def load_data():
-
     if not os.path.exists(DATA_FILE):
         return default_data()
 
-
     try:
+        with open(DATA_FILE, "r") as f:
+            data = json.load(f)
 
-        with open(DATA_FILE,"r") as f:
-            data=json.load(f)
-
-
-        if data["date"] != str(date.today()):
-
-            if data["steps"] > data["record"]:
-                data["record"]=data["steps"]
-
-
-            data["date"]=str(date.today())
-            data["steps"]=0
-            data["sensor_start"]=None
-
+        # Gün değiştiyse adımları sıfırla ve rekoru güncelle
+        if data.get("date") != str(date.today()):
+            if data.get("steps", 0) > data.get("record", 0):
+                data["record"] = data["steps"]
+            data["date"] = str(date.today())
+            data["steps"] = 0
 
         return data
-
-
-    except:
-
+    except Exception:
         return default_data()
 
-
-
 def save_data(data):
-
-    with open(DATA_FILE,"w") as f:
-
-        json.dump(
-            data,
-            f,
-            indent=4
-        )
-
+    try:
+        with open(DATA_FILE, "w") as f:
+            json.dump(data, f, indent=4)
+    except Exception as e:
+        print(f"Veri kaydedilirken hata oluştu: {e}")
 
 
 # ===============================
-# KART TASARIMI
+# FLET UYGULAMASI
 # ===============================
 
-class Card(BoxLayout):
+def main(page: ft.Page):
+    page.title = "Step Pro"
+    page.bgcolor = "#080A10"  # Kivy'deki koyu arka plan renk tonu
+    page.padding = 20
+    page.theme_mode = ft.ThemeMode.DARK
+    page.scroll = ft.ScrollMode.AUTO
 
-    def __init__(self,**kwargs):
+    # Verileri yükle
+    data = load_data()
 
-        super().__init__(**kwargs)
+    # --- ŞEHİR VE DEĞİŞKENLER ---
+    current_steps = data.get("steps", 0)
+    current_goal = data.get("goal", 10000)
+    current_record = data.get("record", 0)
 
+    # --- UI ELEMANLARI ---
 
-        with self.canvas.before:
+    # Başlık
+    title_label = ft.Text(
+        "👟 STEP PRO",
+        size=30,
+        weight=ft.FontWeight.BOLD,
+        color=ft.colors.WHITE,
+        text_align=ft.TextAlign.CENTER,
+    )
 
-            Color(
-                0.08,
-                0.09,
-                0.13,
-                1
-            )
+    # Durum Etiketi
+    status_label = ft.Text(
+        "Sensör Hazır / Manuel Takip",
+        size=14,
+        color="#4DB6AC",
+        text_align=ft.TextAlign.CENTER,
+    )
 
+    # Adım Sayacı Göstergesi
+    step_count_text = ft.Text(
+        str(current_steps),
+        size=48,
+        weight=ft.FontWeight.BOLD,
+        color=ft.colors.LIGHT_BLUE_400,
+    )
 
-            self.bg = RoundedRectangle(
-                radius=[dp(20)]
-            )
+    goal_text = ft.Text(
+        f"Hedef: {current_goal} adım",
+        size=16,
+        color=ft.colors.GREY_400,
+    )
 
+    record_text = ft.Text(
+        f"Rekor: {current_record} adım",
+        size=14,
+        color=ft.colors.AMBER_400,
+        weight=ft.FontWeight.W_500,
+    )
 
-        self.bind(
-            pos=self.update,
-            size=self.update
+    # İlerleme Çubuğu (Progress Bar)
+    progress_val = min(current_steps / current_goal if current_goal > 0 else 0, 1.0)
+    progress_bar = ft.ProgressBar(
+        value=progress_val,
+        color=ft.colors.LIGHT_BLUE_400,
+        bgcolor="#1A1C23",
+        height=12,
+    )
+
+    # Güncelleme ve Kaydetme Fonksiyonu
+    def update_ui_and_save():
+        nonlocal current_steps, current_record
+        
+        # Rekor kontrolü
+        if current_steps > current_record:
+            current_record = current_steps
+            record_text.value = f"Rekor: {current_record} adım"
+
+        # Görselleri güncelle
+        step_count_text.value = str(current_steps)
+        progress_bar.value = min(current_steps / current_goal if current_goal > 0 else 0, 1.0)
+        
+        # JSON'a kaydet
+        data["steps"] = current_steps
+        data["record"] = current_record
+        data["goal"] = current_goal
+        save_data(data)
+        
+        page.update()
+
+    # --- BUTON KONTROLLERİ ---
+    def add_steps(e, amount):
+        nonlocal current_steps
+        current_steps += amount
+        update_ui_and_save()
+
+    def reset_steps(e):
+        nonlocal current_steps
+        current_steps = 0
+        update_ui_and_save()
+
+    # --- KART TASARIMLARI (Kivy'deki Card sınıfı yerine Container) ---
+    
+    # Ana İlerleme Kartı
+    main_card = ft.Container(
+        content=ft.Column(
+            controls=[
+                ft.Text("BUGÜNKÜ ADIMLAR", size=12, color=ft.colors.GREY_400, weight=ft.FontWeight.BOLD),
+                step_count_text,
+                progress_bar,
+                ft.Row(
+                    controls=[goal_text, record_text],
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                ),
+            ],
+            spacing=15,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        ),
+        bgcolor="#141722",
+        padding=25,
+        border_radius=20,
+    )
+
+    # Hızlı Aksiyon/Test Kartı
+    action_card = ft.Container(
+        content=ft.Column(
+            controls=[
+                ft.Text("Hızlı Adım Ekle / Simüle Et", size=14, color=ft.colors.WHITE),
+                ft.Row(
+                    controls=[
+                        ft.ElevatedButton("+100", on_click=lambda e: add_steps(e, 100), bgcolor="#1E88E5", color=ft.colors.WHITE),
+                        ft.ElevatedButton("+500", on_click=lambda e: add_steps(e, 500), bgcolor="#1565C0", color=ft.colors.WHITE),
+                        ft.ElevatedButton("+1000", on_click=lambda e: add_steps(e, 1000), bgcolor="#0D47A1", color=ft.colors.WHITE),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    spacing=10,
+                ),
+                ft.OutlinedButton("Sıfırla", on_click=reset_steps, stroke_color=ft.colors.RED_400, color=ft.colors.RED_400),
+            ],
+            spacing=15,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        ),
+        bgcolor="#141722",
+        padding=20,
+        border_radius=20,
+    )
+
+    # Sayfaya Elemanları Ekle
+    page.add(
+        ft.Column(
+            controls=[
+                title_label,
+                status_label,
+                ft.Divider(height=10, color=ft.colors.TRANSPARENT),
+                main_card,
+                ft.Divider(height=10, color=ft.colors.TRANSPARENT),
+                action_card,
+            ],
+            horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
+            spacing=10,
         )
+    )
 
-
-
-    def update(self,*args):
-
-        self.bg.pos=self.pos
-        self.bg.size=self.size
-
-
-
-# ===============================
-# UYGULAMA
-# ===============================
-
-
-class StepCounter(App):
-
-
-    def build(self):
-
-        self.title="Step Pro"
-
-
-
-        self.data=load_data()
-
-
-        self.steps=self.data["steps"]
-        self.goal=self.data["goal"]
-        self.record=self.data["record"]
-
-        self.sensor_start=self.data["sensor_start"]
-
-
-
-        if ANDROID:
-
-            request_permissions(
-                [
-                    Permission.ACTIVITY_RECOGNITION
-                ]
-            )
-
-
-
-        root=BoxLayout(
-            orientation="vertical",
-            padding=dp(20),
-            spacing=dp(15)
-        )
-
-
-
-        with root.canvas.before:
-
-            Color(
-                0.03,
-                0.04,
-                0.06,
-                1
-            )
-
-
-            self.background=RoundedRectangle()
-
-
-
-        root.bind(
-            pos=self.update_bg,
-            size=self.update_bg
-        )
-
-
-
-        title=Label(
-
-            text="👟 STEP PRO",
-
-            font_size=dp(30),
-
-            bold=True,
-
-            size_hint_y=None,
-
-            height=dp(60)
-
-        )
-
-
-        root.add_widget(title)
-
-
-
-        self.status=Label(
-
-            text="Sensör hazırlanıyor",
-
-            color=(0.3,0.7,1,1),
-
-            size_hint_y=None,
-
-            height=dp(30)
-
-        )
-
-
-        root.add_widget(self.status)
+ft.app(target=main)
