@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch: # Actions sekmesinden manuel tetikleme için
+  workflow_dispatch:
 
 jobs:
   build:
@@ -14,7 +14,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 1. İyileştirme: Caching (Önbellekleme). SDK/NDK indirmelerini hafızada tutar.
+      # 1. Python kurulumu
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 2. Buildozer ve gerekli sistem kütüphanelerinin doğrudan Ubuntu'ya kurulması
+      - name: Install system dependencies and Buildozer
+        run: |
+          sudo apt update
+          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+          pip install --upgrade cython virtualenv buildozer
+
+      # 3. Önbellekleme (Derleme hızlandırmak için)
       - name: Cache Buildozer global directory
         uses: actions/cache@v4
         with:
@@ -31,18 +44,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildozer-
 
-      # Derleme İşlemi
+      # 4. Bozuk eklenti yerine Buildozer'i doğrudan terminalden çalıştırıyoruz
       - name: Build with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1
-        id: buildozer
-        with:
-          command: buildozer android debug
-          buildozer_version: master
+        run: buildozer android debug
 
-      # 2. İyileştirme: APK dosyasını sisteme yükleme ve saklama süresi belirleme
+      # 5. Oluşan APK'yı GitHub'a yükleme
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: Projem-APK
-          path: ${{ steps.buildozer.outputs.filename }}
-          retention-days: 7 # Oluşan APK'yı GitHub'da 7 gün boyunca saklar
+          path: bin/*.apk
+          retention-days: 7
