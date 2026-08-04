@@ -65,7 +65,7 @@ def main(page: ft.Page):
         "👟 STEP PRO",
         size=30,
         weight=ft.FontWeight.BOLD,
-        color=ft.Colors.WHITE,
+        color="#FFFFFF",
         text_align=ft.TextAlign.CENTER,
     )
 
@@ -80,26 +80,26 @@ def main(page: ft.Page):
         str(current_steps),
         size=48,
         weight=ft.FontWeight.BOLD,
-        color=ft.Colors.LIGHT_BLUE_400,
+        color="#29B6F6",
     )
 
     goal_text = ft.Text(
         f"Hedef: {current_goal} adım",
         size=16,
-        color=ft.Colors.GREY_400,
+        color="#B0BEC5",
     )
 
     record_text = ft.Text(
         f"Rekor: {current_record} adım",
         size=14,
-        color=ft.Colors.AMBER_400,
+        color="#FFCA28",
         weight=ft.FontWeight.W_500,
     )
 
     progress_val = min(current_steps / current_goal if current_goal > 0 else 0, 1.0)
     progress_bar = ft.ProgressBar(
         value=progress_val,
-        color=ft.Colors.LIGHT_BLUE_400,
+        color="#29B6F6",
         bgcolor="#1A1C23",
         height=12,
     )
@@ -134,7 +134,7 @@ def main(page: ft.Page):
     main_card = ft.Container(
         content=ft.Column(
             controls=[
-                ft.Text("BUGÜNKÜ ADIMLAR", size=12, color=ft.Colors.GREY_400, weight=ft.FontWeight.BOLD),
+                ft.Text("BUGÜNKÜ ADIMLAR", size=12, color="#B0BEC5", weight=ft.FontWeight.BOLD),
                 step_count_text,
                 progress_bar,
                 ft.Row(
@@ -153,17 +153,22 @@ def main(page: ft.Page):
     action_card = ft.Container(
         content=ft.Column(
             controls=[
-                ft.Text("Hızlı Adım Ekle / Simüle Et", size=14, color=ft.Colors.WHITE),
+                ft.Text("Hızlı Adım Ekle / Simüle Et", size=14, color="#FFFFFF"),
                 ft.Row(
                     controls=[
-                        ft.ElevatedButton("+100", on_click=lambda e: add_steps(e, 100), bgcolor="#1E88E5", color=ft.Colors.WHITE),
-                        ft.ElevatedButton("+500", on_click=lambda e: add_steps(e, 500), bgcolor="#1565C0", color=ft.Colors.WHITE),
-                        ft.ElevatedButton("+1000", on_click=lambda e: add_steps(e, 1000), bgcolor="#0D47A1", color=ft.Colors.WHITE),
+                        ft.ElevatedButton("+100", on_click=lambda e: add_steps(e, 100), bgcolor="#1E88E5", color="#FFFFFF"),
+                        ft.ElevatedButton("+500", on_click=lambda e: add_steps(e, 500), bgcolor="#1565C0", color="#FFFFFF"),
+                        ft.ElevatedButton("+1000", on_click=lambda e: add_steps(e, 1000), bgcolor="#0D47A1", color="#FFFFFF"),
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     spacing=10,
                 ),
-                ft.OutlinedButton("Sıfırla", on_click=reset_steps, stroke_color=ft.Colors.RED_400, color=ft.Colors.RED_400),
+                ft.ElevatedButton(
+                    "Sıfırla", 
+                    on_click=reset_steps, 
+                    bgcolor="#D32F2F", 
+                    color="#FFFFFF"
+                ),
             ],
             spacing=15,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -178,9 +183,9 @@ def main(page: ft.Page):
             controls=[
                 title_label,
                 status_label,
-                ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
+                ft.Divider(height=10, color="#00000000"),
                 main_card,
-                ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
+                ft.Divider(height=10, color="#00000000"),
                 action_card,
             ],
             horizontal_alignment=ft.CrossAxisAlignment.STRETCH,
