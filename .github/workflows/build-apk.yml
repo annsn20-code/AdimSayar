@@ -1,4 +1,4 @@
-name: Build Flet Android APK
+name: Build Kivy Step Pro APK
 
 on:
   push:
@@ -24,27 +24,24 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.29.x'
-          channel: 'stable'
-
-      - name: Install Android NDK & SDK Components
+      - name: Install System Dependencies
         run: |
-          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;25.2.9519653" "build-tools;34.0.0" "platforms;android-34"
+          sudo apt-get update
+          sudo apt-get install -y build-essential ccache git python3-pip libffi-dev libssl-dev \
+            autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 \
+            cmake zip unzip
 
-      - name: Install Python Dependencies
+      - name: Install Buildozer & Cython
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install buildozer cython
 
-      - name: Build Android APK
+      - name: Build Android APK with Buildozer
         run: |
-          flet build apk --yes --verbose
+          buildozer -v android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: step-pro-apk
-          path: build/apk/*.apk
+          name: kivy-step-pro-apk
+          path: bin/*.apk
