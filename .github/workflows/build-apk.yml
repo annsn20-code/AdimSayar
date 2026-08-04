@@ -14,41 +14,38 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 1. Python kurulumu
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # 2. Buildozer ve gerekli sistem kütüphanelerinin doğrudan Ubuntu'ya kurulması
       - name: Install system dependencies and Buildozer
         run: |
           sudo apt update
           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
           pip install --upgrade cython virtualenv buildozer
 
-      # 3. Önbellekleme (Derleme hızlandırmak için)
+      # 1. HAMLE: Cache key'lerine '-v2' ekleyip bozuk önbelleği sıfırladık
       - name: Cache Buildozer global directory
         uses: actions/cache@v4
         with:
           path: .buildozer_global
-          key: buildozer-global-${{ hashFiles('buildozer.spec') }}
+          key: buildozer-global-v2-${{ hashFiles('buildozer.spec') }}
           restore-keys: |
-            buildozer-global-
+            buildozer-global-v2-
 
       - name: Cache Buildozer directory
         uses: actions/cache@v4
         with:
           path: .buildozer
-          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
+          key: ${{ runner.os }}-buildozer-v2-${{ hashFiles('buildozer.spec') }}
           restore-keys: |
-            ${{ runner.os }}-buildozer-
+            ${{ runner.os }}-buildozer-v2-
 
-      # 4. Bozuk eklenti yerine Buildozer'i doğrudan terminalden çalıştırıyoruz
+      # 2. HAMLE: 'yes |' ekleyerek olası lisans sorularını otomatik onaylattık
       - name: Build with Buildozer
-        run: buildozer android debug
+        run: yes | buildozer android debug
 
-      # 5. Oluşan APK'yı GitHub'a yükleme
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
