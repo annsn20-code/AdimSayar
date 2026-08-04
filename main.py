@@ -25,7 +25,6 @@ def load_data():
         with open(DATA_FILE, "r") as f:
             data = json.load(f)
 
-        # Gün değiştiyse adımları sıfırla ve rekoru güncelle
         if data.get("date") != str(date.today()):
             if data.get("steps", 0) > data.get("record", 0):
                 data["record"] = data["steps"]
@@ -50,22 +49,18 @@ def save_data(data):
 
 def main(page: ft.Page):
     page.title = "Step Pro"
-    page.bgcolor = "#080A10"  # Kivy'deki koyu arka plan renk tonu
+    page.bgcolor = "#080A10"
     page.padding = 20
     page.theme_mode = ft.ThemeMode.DARK
     page.scroll = ft.ScrollMode.AUTO
 
-    # Verileri yükle
     data = load_data()
 
-    # --- ŞEHİR VE DEĞİŞKENLER ---
     current_steps = data.get("steps", 0)
     current_goal = data.get("goal", 10000)
     current_record = data.get("record", 0)
 
-    # --- UI ELEMANLARI ---
-
-    # Başlık
+    # UI ELEMANLARI
     title_label = ft.Text(
         "👟 STEP PRO",
         size=30,
@@ -74,7 +69,6 @@ def main(page: ft.Page):
         text_align=ft.TextAlign.CENTER,
     )
 
-    # Durum Etiketi
     status_label = ft.Text(
         "Sensör Hazır / Manuel Takip",
         size=14,
@@ -82,7 +76,6 @@ def main(page: ft.Page):
         text_align=ft.TextAlign.CENTER,
     )
 
-    # Adım Sayacı Göstergesi
     step_count_text = ft.Text(
         str(current_steps),
         size=48,
@@ -103,7 +96,6 @@ def main(page: ft.Page):
         weight=ft.FontWeight.W_500,
     )
 
-    # İlerleme Çubuğu (Progress Bar)
     progress_val = min(current_steps / current_goal if current_goal > 0 else 0, 1.0)
     progress_bar = ft.ProgressBar(
         value=progress_val,
@@ -112,20 +104,16 @@ def main(page: ft.Page):
         height=12,
     )
 
-    # Güncelleme ve Kaydetme Fonksiyonu
     def update_ui_and_save():
         nonlocal current_steps, current_record
         
-        # Rekor kontrolü
         if current_steps > current_record:
             current_record = current_steps
             record_text.value = f"Rekor: {current_record} adım"
 
-        # Görselleri güncelle
         step_count_text.value = str(current_steps)
         progress_bar.value = min(current_steps / current_goal if current_goal > 0 else 0, 1.0)
         
-        # JSON'a kaydet
         data["steps"] = current_steps
         data["record"] = current_record
         data["goal"] = current_goal
@@ -133,7 +121,6 @@ def main(page: ft.Page):
         
         page.update()
 
-    # --- BUTON KONTROLLERİ ---
     def add_steps(e, amount):
         nonlocal current_steps
         current_steps += amount
@@ -144,9 +131,6 @@ def main(page: ft.Page):
         current_steps = 0
         update_ui_and_save()
 
-    # --- KART TASARIMLARI (Kivy'deki Card sınıfı yerine Container) ---
-    
-    # Ana İlerleme Kartı
     main_card = ft.Container(
         content=ft.Column(
             controls=[
@@ -166,7 +150,6 @@ def main(page: ft.Page):
         border_radius=20,
     )
 
-    # Hızlı Aksiyon/Test Kartı
     action_card = ft.Container(
         content=ft.Column(
             controls=[
@@ -190,7 +173,6 @@ def main(page: ft.Page):
         border_radius=20,
     )
 
-    # Sayfaya Elemanları Ekle
     page.add(
         ft.Column(
             controls=[
